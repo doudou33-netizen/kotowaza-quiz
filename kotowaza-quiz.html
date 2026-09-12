@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>ことわざクイズ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EEDC;
+    --card:#FBF8ED;
+    --ink:#262220;
+    --ink-soft:#5b544c;
+    --indigo:#233A5E;
+    --indigo-deep:#182842;
+    --vermilion:#B33B2B;
+    --line:#D8CFB8;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at top left, rgba(35,58,94,0.05), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(179,59,43,0.05), transparent 55%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"Zen Kaku Gothic New", sans-serif;
+    display:flex;
+    justify-content:center;
+    min-height:100vh;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  #app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:max(20px, env(safe-area-inset-top)) 20px 28px;
+  }
+
+  /* header */
+  header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom:2px solid var(--indigo);
+    padding-bottom:10px;
+    margin-bottom:18px;
+  }
+  header h1{
+    font-family:"Shippori Mincho", serif;
+    font-weight:700;
+    font-size:22px;
+    letter-spacing:.04em;
+    margin:0;
+    color:var(--indigo-deep);
+  }
+  #progress-label{
+    font-size:13px;
+    color:var(--ink-soft);
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* progress bar */
+  #progress-track{
+    height:4px;
+    background:var(--line);
+    border-radius:2px;
+    margin-bottom:26px;
+    overflow:hidden;
+  }
+  #progress-fill{
+    height:100%;
+    background:var(--vermilion);
+    width:0%;
+    transition:width .35s ease;
+  }
+
+  main{flex:1; display:flex; flex-direction:column;}
+
+  /* question card */
+  #q-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-left:5px solid var(--indigo);
+    border-radius:4px;
+    padding:26px 22px;
+    box-shadow:0 1px 0 rgba(38,34,32,.04);
+    margin-bottom:22px;
+  }
+  #q-eyebrow{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+  }
+  #q-meaning{
+    font-family:"Shippori Mincho", serif;
+    font-size:19px;
+    line-height:1.75;
+    margin:0;
+    color:var(--ink);
+  }
+
+  /* choices */
+  #choices{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .choice{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    text-align:left;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:15px 16px;
+    font-family:"Shippori Mincho", serif;
+    font-size:17px;
+    color:var(--ink);
+    cursor:pointer;
+    transition:background .15s ease, border-color .15s ease, transform .1s ease;
+  }
+  .choice:active{transform:scale(.99);}
+  .choice .mark{
+    flex:none;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:1.5px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:"Zen Kaku Gothic New", sans-serif;
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink-soft);
+  }
+  .choice:not(.locked):hover{border-color:var(--indigo);}
+  .choice.correct{
+    background:#F4EDE3;
+    border-color:var(--vermilion);
+  }
+  .choice.correct .mark{
+    background:var(--vermilion);
+    border-color:var(--vermilion);
+    color:#fff;
+  }
+  .choice.wrong{
+    border-color:var(--ink-soft);
+    opacity:.6;
+  }
+  .choice.wrong .mark{
+    background:var(--ink-soft);
+    border-color:var(--ink-soft);
+    color:#fff;
+  }
+  .choice.dim{opacity:.45;}
+  .choice.locked{cursor:default;}
+
+  /* feedback + next */
+  #feedback{
+    min-height:20px;
+    margin:16px 2px 0;
+    font-size:14px;
+    color:var(--indigo-deep);
+    display:none;
+  }
+  #feedback.show{display:block;}
+
+  #next-btn{
+    margin-top:18px;
+    width:100%;
+    background:var(--indigo-deep);
+    color:#F3EEDC;
+    border:none;
+    border-radius:4px;
+    padding:15px;
+    font-family:"Zen Kaku Gothic New", sans-serif;
+    font-weight:700;
+    font-size:16px;
+    letter-spacing:.02em;
+    cursor:pointer;
+    display:none;
+  }
+  #next-btn.show{display:block;}
+  #next-btn:active{background:var(--indigo);}
+
+  /* start / result screens */
+  .screen{
+    flex:1;
+    display:none;
+    flex-direction:column;
+    justify-content:center;
+    text-align:center;
+    gap:22px;
+  }
+  .screen.show{display:flex;}
+  .screen h2{
+    font-family:"Shippori Mincho", serif;
+    font-size:24px;
+    color:var(--indigo-deep);
+    margin:0;
+  }
+  .screen p{
+    color:var(--ink-soft);
+    font-size:15px;
+    line-height:1.8;
+    margin:0;
+  }
+  .big-btn{
+    background:var(--indigo-deep);
+    color:#F3EEDC;
+    border:none;
+    border-radius:4px;
+    padding:16px;
+    font-family:"Zen Kaku Gothic New", sans-serif;
+    font-weight:700;
+    font-size:16px;
+    cursor:pointer;
+  }
+  .big-btn:active{background:var(--indigo);}
+  .ghost-btn{
+    background:none;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:14px;
+    font-family:"Zen Kaku Gothic New", sans-serif;
+    font-size:14px;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+
+  #result-score{
+    font-family:"Shippori Mincho", serif;
+    font-size:52px;
+    color:var(--vermilion);
+    font-weight:700;
+    line-height:1;
+  }
+  #result-score span{
+    font-size:20px;
+    color:var(--ink-soft);
+    font-family:"Zen Kaku Gothic New", sans-serif;
+  }
+
+  #review-list{
+    text-align:left;
+    max-height:34vh;
+    overflow-y:auto;
+    border-top:1px solid var(--line);
+    padding-top:14px;
+    display:none;
+    flex-direction:column;
+    gap:10px;
+  }
+  #review-list.show{display:flex;}
+  .review-item{
+    font-size:13.5px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    border-left:3px solid var(--vermilion);
+    padding:2px 0 2px 10px;
+  }
+  .review-item b{color:var(--ink); font-family:"Shippori Mincho", serif; font-size:15px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <h1>ことわざクイズ</h1>
+    <span id="progress-label"></span>
+  </header>
+  <div id="progress-track"><div id="progress-fill"></div></div>
+
+  <main>
+
+    <!-- start screen -->
+    <section class="screen show" id="screen-start">
+      <h2>意味からことわざを当てよう</h2>
+      <p>ことわざの「意味」が出るので、<br>合うことわざを４つの中から選んでね。<br>全部で100問、小学生レベルのことわざだよ。</p>
+      <button class="big-btn" id="start-btn">はじめる</button>
+    </section>
+
+    <!-- quiz screen -->
+    <section id="screen-quiz">
+      <div id="q-card">
+        <p id="q-eyebrow">この意味を表することわざは？</p>
+        <p id="q-meaning"></p>
+      </div>
+      <div id="choices"></div>
+      <p id="feedback"></p>
+      <button id="next-btn">つぎへ</button>
+    </section>
+
+    <!-- result screen -->
+    <section class="screen" id="screen-result">
+      <h2>結果発表</h2>
+      <div id="result-score">0<span>/ 100問</span></div>
+      <p id="result-comment"></p>
+      <button class="big-btn" id="retry-btn">もう一度挑戦する</button>
+      <button class="ghost-btn" id="review-btn">間違えた問題を見る</button>
+      <div id="review-list"></div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+/* ---------------- 100 elementary-level kotowaza ---------------- */
+const DATA = [
+["猿も木から落ちる","どんなに得意なことでも、失敗することがあるということ。"],
+["石の上にも三年","つらくても我慢して続ければ、いつか成功するということ。"],
+["犬も歩けば棒に当たる","何かをすれば、思いがけない出来事に出会うということ。"],
+["花より団子","見た目の美しさより、実際に役立つものの方がよいということ。"],
+["早起きは三文の徳","朝早く起きると、良いことがあるということ。"],
+["三度目の正直","一度や二度失敗しても、三回目にはうまくいくということ。"],
+["二階から目薬","物事が思うようにいかず、もどかしいことのたとえ。"],
+["蛙の子は蛙","子どもは結局、親に似るものだということ。"],
+["亀の甲より年の功","年上の人の長年の経験や知恵は貴重だということ。"],
+["灯台下暗し","身近なことは、かえって気づきにくいということ。"],
+["火のない所に煙は立たぬ","何の根拠もないのに、うわさは立たないということ。"],
+["七転び八起き","何度失敗しても、あきらめずに立ち直ること。"],
+["塵も積もれば山となる","小さなものでも、たくさん集まれば大きくなるということ。"],
+["転ばぬ先の杖","失敗しないように、前もって準備しておくこと。"],
+["二兎を追う者は一兎をも得ず","欲を出して二つのことを同時にしようとすると、どちらも失敗するということ。"],
+["猫に小判","価値のわからない人に、貴重なものを与えても意味がないこと。"],
+["馬の耳に念仏","いくら意見を言っても、まったく効き目がないこと。"],
+["豚に真珠","値打ちがわからない人に、大切なものを与えても無駄だということ。"],
+["井の中の蛙大海を知らず","せまい世界にいて、広い世界のことを知らないこと。"],
+["百聞は一見に如かず","人から何度も聞くより、一度自分の目で見る方がよくわかるということ。"],
+["継続は力なり","一つのことを続けることが、大きな力になるということ。"],
+["光陰矢の如し","月日が経つのは、矢のようにとても速いということ。"],
+["案ずるより産むが易し","あれこれ心配するより、やってみると意外と簡単だということ。"],
+["急がば回れ","急いでいる時ほど、遠くても安全な道を選んだ方がよいということ。"],
+["果報は寝て待て","あせらずに、良い時期が来るのをのんびり待つのがよいということ。"],
+["棚からぼた餅","思いがけない幸運が舞い込んでくること。"],
+["一石二鳥","一つのことをして、同時に二つの利益を得ること。"],
+["千里の道も一歩から","どんな大きなことも、まずは小さな一歩から始まるということ。"],
+["雨降って地固まる","もめごとの後、かえって物事がうまく収まるということ。"],
+["蒔かぬ種は生えぬ","何もしなければ、良い結果は得られないということ。"],
+["出る杭は打たれる","目立つ人は、他人から非難されたり邪魔されたりしやすいということ。"],
+["知らぬが仏","知らないでいれば、心穏やかでいられるということ。"],
+["覆水盆に返らず","一度してしまったことは、もう取り返しがつかないということ。"],
+["良薬は口に苦し","本当に役立つ忠告ほど、聞くのがつらいということ。"],
+["三人寄れば文殊の知恵","凡人でも三人集まって考えれば、良い知恵が浮かぶということ。"],
+["木を見て森を見ず","小さな部分にとらわれて、全体を見失うこと。"],
+["好きこそ物の上手なれ","好きなことは、熱心に励むので上達するということ。"],
+["立つ鳥跡を濁さず","立ち去る者は、あとが見苦しくないよう始末をしておくべきだということ。"],
+["弘法にも筆の誤り","どんな名人でも、時には失敗することがあるということ。"],
+["河童の川流れ","その道の名人でも、時には失敗することがあるということ。"],
+["明日は明日の風が吹く","先のことを心配しても仕方がない、なんとかなるということ。"],
+["一寸の虫にも五分の魂","どんなに小さく弱い者にも、それなりの意地や考えがあるということ。"],
+["蓼食う虫も好き好き","人の好みはさまざまで、変わったものを好む人もいるということ。"],
+["蛇の道は蛇","同じ仲間のことは、その道の者がよく知っているということ。"],
+["隣の芝生は青い","他人のものは、自分のものより良く見えるということ。"],
+["泣き面に蜂","悪いことの上に、さらに悪いことが重なること。"],
+["弱り目に祟り目","困っている時に、さらに困ったことが重なること。"],
+["二度あることは三度ある","同じようなことは、繰り返し起こりやすいということ。"],
+["習うより慣れろ","人から教わるより、実際にやって慣れる方が身につくということ。"],
+["石橋を叩いて渡る","用心の上にも用心を重ねて、物事を行うこと。"],
+["温故知新","昔のことを学び直して、新しい知識や考えを見つけること。"],
+["一を聞いて十を知る","少し聞いただけで、全体を理解してしまうほど賢いこと。"],
+["過ぎたるは猶及ばざるが如し","やりすぎることは、足りないことと同じくらい良くないということ。"],
+["老いては子に従え","年をとったら、子どもの意見に従うのがよいということ。"],
+["会うは別れの始め","出会った人とは、いつか必ず別れが来るということ。"],
+["青は藍より出でて藍より青し","弟子が師匠より優れた人になることのたとえ。"],
+["朱に交われば赤くなる","つきあう人によって、良くも悪くも影響を受けるということ。"],
+["類は友を呼ぶ","気の合う者や似た者同士は、自然と集まるということ。"],
+["我が身をつねって人の痛さを知れ","自分がつらい思いをして、初めて他人の痛みがわかるということ。"],
+["情けは人のためならず","人に親切にすれば、めぐりめぐって自分に返ってくるということ。"],
+["因果応報","良い行いにも悪い行いにも、それに応じた報いがあるということ。"],
+["善は急げ","良いと思ったことは、迷わずすぐに行動するのがよいということ。"],
+["思い立ったが吉日","何かをしようと思ったら、その日をよい日として、すぐ始めるのがよいということ。"],
+["焼け石に水","わずかな努力や援助では、効果がほとんどないこと。"],
+["骨折り損のくたびれ儲け","苦労しただけで、何の得にもならないこと。"],
+["労多くして功少なし","苦労は多いのに、成果が少ないこと。"],
+["虻蜂取らず","二つのものを同時に得ようとして、両方とも失敗すること。"],
+["大は小を兼ねる","大きいものは、小さいものの代わりとしても使えるということ。"],
+["備えあれば憂いなし","前もって準備をしておけば、いざという時に困らないということ。"],
+["短気は損気","すぐに怒ったり急いだりすると、結局は自分が損をするということ。"],
+["待てば海路の日和あり","焦らずに待っていれば、いつか良い機会がやってくるということ。"],
+["塞翁が馬","人生の幸不幸は、そのときにはわからないものだということ。"],
+["苦あれば楽あり","つらいことの後には、楽しいことがやってくるということ。"],
+["楽あれば苦あり","楽しいことの後には、つらいことがやってくるということ。"],
+["笑う門には福来る","いつも笑って明るく過ごしていれば、自然と幸せがやってくるということ。"],
+["名は体を表す","名前は、その人やものの性質をよく表しているということ。"],
+["百害あって一利なし","悪いことばかりで、良いことが一つもないこと。"],
+["下手の横好き","上手ではないのに、そのことがとても好きで熱心なこと。"],
+["器用貧乏","何でも一通りできる人は、かえって一つのことを極められず大成しにくいこと。"],
+["蛙の面に水","どんな仕打ちを受けても、平気でいることのたとえ。"],
+["猫の手も借りたい","とても忙しくて、誰でもいいから手伝ってほしいこと。"],
+["猫をかぶる","本当の性格を隠して、おとなしそうに見せること。"],
+["馬子にも衣装","どんな人でも、身なりを整えれば立派に見えるということ。"],
+["十人十色","人によって、考え方や好みはそれぞれ違うということ。"],
+["郷に入っては郷に従え","その土地に住んだら、そこの習慣に従うのがよいということ。"],
+["言わぬが花","何でも言葉にしてしまわず、言わない方がよいこともあるということ。"],
+["口は災いの元","不用意な発言が、思わぬ災いを招くもとになるということ。"],
+["三つ子の魂百まで","幼い頃の性格は、年をとっても変わらないということ。"],
+["鳶が鷹を生む","平凡な親から、優れた子どもが生まれること。"],
+["瓜のつるに茄子はならぬ","平凡な親からは、平凡な子どもしか生まれないということ。"],
+["目は口ほどに物を言う","気持ちは、言葉よりも目つきによく表れるということ。"],
+["沈黙は金","余計なことを言わず、黙っている方がよい場合があるということ。"],
+["時は金なり","時間はお金と同じくらい大切なものだということ。"],
+["一期一会","一生に一度だけの出会いだと思って、大切にすること。"],
+["有終の美","物事を最後まで立派にやり遂げること。"],
+["初心忘るべからず","始めた時の新鮮な気持ちや謙虚さを忘れてはいけないということ。"],
+["論より証拠","あれこれ議論するより、証拠を示す方が確かだということ。"],
+["損して得取れ","目先の損を気にせず、あとで大きな得を得るようにすること。"],
+["急いては事を仕損じる","慌てて物事を行うと、失敗しやすいということ。"],
+["腐っても鯛","本当にすぐれたものは、悪くなったり古くなったりしても、それなりの価値を保っているということ。"],
+["医者の不養生","人には立派なことを言うのに、自分では実行できていないことのたとえ。"]
+];
+
+const QUESTIONS = DATA.map(([p,m]) => ({p, m}));
+
+/* ---------------- state ---------------- */
+let order = [];
+let idx = 0;
+let score = 0;
+let wrongList = [];
+let answered = false;
+
+/* ---------------- elements ---------------- */
+const screenStart = document.getElementById('screen-start');
+const screenQuiz = document.getElementById('screen-quiz');
+const screenResult = document.getElementById('screen-result');
+const progressLabel = document.getElementById('progress-label');
+const progressFill = document.getElementById('progress-fill');
+const qMeaning = document.getElementById('q-meaning');
+const choicesEl = document.getElementById('choices');
+const feedbackEl = document.getElementById('feedback');
+const nextBtn = document.getElementById('next-btn');
+const resultScore = document.getElementById('result-score');
+const resultComment = document.getElementById('result-comment');
+const reviewBtn = document.getElementById('review-btn');
+const reviewList = document.getElementById('review-list');
+
+document.getElementById('start-btn').addEventListener('click', startQuiz);
+document.getElementById('retry-btn').addEventListener('click', startQuiz);
+nextBtn.addEventListener('click', nextQuestion);
+reviewBtn.addEventListener('click', () => {
+  reviewList.classList.toggle('show');
+  reviewBtn.textContent = reviewList.classList.contains('show') ? '間違えた問題を閉じる' : '間違えた問題を見る';
+});
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function startQuiz(){
+  order = shuffle(QUESTIONS.map((_,i)=>i));
+  idx = 0;
+  score = 0;
+  wrongList = [];
+  reviewList.classList.remove('show');
+  reviewList.innerHTML = '';
+  reviewBtn.textContent = '間違えた問題を見る';
+  show(screenQuiz);
+  renderQuestion();
+}
+
+function show(screen){
+  [screenStart, screenQuiz, screenResult].forEach(s => s.classList.remove('show'));
+  screen.classList.add('show');
+}
+
+function renderQuestion(){
+  answered = false;
+  feedbackEl.classList.remove('show');
+  nextBtn.classList.remove('show');
+
+  const q = QUESTIONS[order[idx]];
+  progressLabel.textContent = (idx+1) + ' / ' + QUESTIONS.length;
+  progressFill.style.width = ((idx)/QUESTIONS.length*100) + '%';
+  qMeaning.textContent = q.m;
+
+  const distractorPool = QUESTIONS.filter((_,i) => i !== order[idx]).map(x => x.p);
+  const distractors = shuffle(distractorPool).slice(0,3);
+  const options = shuffle([q.p, ...distractors]);
+  const labels = ['ア','イ','ウ','エ'];
+
+  choicesEl.innerHTML = '';
+  options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.innerHTML = '<span class="mark">' + labels[i] + '</span><span>' + opt + '</span>';
+    btn.addEventListener('click', () => selectAnswer(btn, opt, q.p, q.m));
+    choicesEl.appendChild(btn);
+  });
+}
+
+function selectAnswer(btn, chosen, correct, meaning){
+  if(answered) return;
+  answered = true;
+
+  const isCorrect = chosen === correct;
+  if(isCorrect){
+    score++;
+    btn.classList.add('correct');
+  } else {
+    btn.classList.add('wrong');
+    wrongList.push({p: correct, m: meaning, chosen});
+  }
+
+  [...choicesEl.children].forEach(c => {
+    c.classList.add('locked');
+    const text = c.querySelector('span:last-child').textContent;
+    if(text === correct) c.classList.add('correct');
+    else if(c !== btn) c.classList.add('dim');
+  });
+
+  feedbackEl.textContent = isCorrect ? '正解！「' + correct + '」' : '残念、正しくは「' + correct + '」';
+  feedbackEl.classList.add('show');
+  nextBtn.classList.add('show');
+  nextBtn.textContent = (idx === QUESTIONS.length-1) ? '結果を見る' : 'つぎへ';
+}
+
+function nextQuestion(){
+  idx++;
+  if(idx >= QUESTIONS.length){
+    finishQuiz();
+  } else {
+    renderQuestion();
+  }
+}
+
+function finishQuiz(){
+  progressFill.style.width = '100%';
+  resultScore.innerHTML = score + '<span>/ ' + QUESTIONS.length + '問</span>';
+
+  let comment;
+  const rate = score / QUESTIONS.length;
+  if(rate === 1) comment = 'パーフェクト！ことわざ博士だね。';
+  else if(rate >= 0.8) comment = 'すごい！ほとんど覚えているね。';
+  else if(rate >= 0.5) comment = 'いい調子！もう少しで半分以上マスターだよ。';
+  else comment = 'これから伸びしろたっぷり！もう一度挑戦してみよう。';
+  resultComment.textContent = comment;
+
+  if(wrongList.length === 0){
+    reviewBtn.style.display = 'none';
+  } else {
+    reviewBtn.style.display = 'inline-block';
+    reviewList.innerHTML = wrongList.map(w =>
+      '<div class="review-item"><b>' + w.p + '</b><br>' + w.m + '</div>'
+    ).join('');
+  }
+
+  show(screenResult);
+}
+</script>
+</body>
+</html>
