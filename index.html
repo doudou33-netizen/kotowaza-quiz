@@ -21,6 +21,7 @@
     --indigo:#233A5E;
     --indigo-deep:#182842;
     --vermilion:#B33B2B;
+    --gold:#C79A3A;
     --line:#D8CFB8;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -37,6 +38,7 @@
     justify-content:center;
     min-height:100vh;
     padding-bottom:env(safe-area-inset-bottom);
+    overflow-x:hidden;
   }
   #app{
     width:100%;
@@ -45,9 +47,20 @@
     display:flex;
     flex-direction:column;
     padding:max(20px, env(safe-area-inset-top)) 20px 28px;
+    position:relative;
+    z-index:1;
   }
 
-  /* header */
+  ruby{ ruby-align:center; }
+  rt{
+    font-size:.55em;
+    font-family:"Zen Kaku Gothic New", sans-serif;
+    color:var(--ink-soft);
+    font-weight:400;
+    letter-spacing:0;
+  }
+  .choice rt{ color:inherit; opacity:.65; }
+
   header{
     display:flex;
     align-items:baseline;
@@ -68,9 +81,9 @@
     font-size:13px;
     color:var(--ink-soft);
     font-variant-numeric:tabular-nums;
+    white-space:nowrap;
   }
 
-  /* progress bar */
   #progress-track{
     height:4px;
     background:var(--line);
@@ -87,7 +100,6 @@
 
   main{flex:1; display:flex; flex-direction:column;}
 
-  /* question card */
   #q-card{
     background:var(--card);
     border:1px solid var(--line);
@@ -100,17 +112,16 @@
   #q-eyebrow{
     font-size:12px;
     color:var(--ink-soft);
-    margin:0 0 10px;
+    margin:0 0 12px;
   }
   #q-meaning{
     font-family:"Shippori Mincho", serif;
     font-size:19px;
-    line-height:1.75;
+    line-height:2.15;
     margin:0;
     color:var(--ink);
   }
 
-  /* choices */
   #choices{
     display:flex;
     flex-direction:column;
@@ -127,6 +138,7 @@
     padding:15px 16px;
     font-family:"Shippori Mincho", serif;
     font-size:17px;
+    line-height:1.9;
     color:var(--ink);
     cursor:pointer;
     transition:background .15s ease, border-color .15s ease, transform .1s ease;
@@ -147,32 +159,18 @@
     color:var(--ink-soft);
   }
   .choice:not(.locked):hover{border-color:var(--indigo);}
-  .choice.correct{
-    background:#F4EDE3;
-    border-color:var(--vermilion);
-  }
-  .choice.correct .mark{
-    background:var(--vermilion);
-    border-color:var(--vermilion);
-    color:#fff;
-  }
-  .choice.wrong{
-    border-color:var(--ink-soft);
-    opacity:.6;
-  }
-  .choice.wrong .mark{
-    background:var(--ink-soft);
-    border-color:var(--ink-soft);
-    color:#fff;
-  }
+  .choice.correct{ background:#F4EDE3; border-color:var(--vermilion); }
+  .choice.correct .mark{ background:var(--vermilion); border-color:var(--vermilion); color:#fff; }
+  .choice.wrong{ border-color:var(--ink-soft); opacity:.6; }
+  .choice.wrong .mark{ background:var(--ink-soft); border-color:var(--ink-soft); color:#fff; }
   .choice.dim{opacity:.45;}
   .choice.locked{cursor:default;}
 
-  /* feedback + next */
   #feedback{
     min-height:20px;
     margin:16px 2px 0;
     font-size:14px;
+    line-height:1.8;
     color:var(--indigo-deep);
     display:none;
   }
@@ -196,14 +194,13 @@
   #next-btn.show{display:block;}
   #next-btn:active{background:var(--indigo);}
 
-  /* start / result screens */
   .screen{
     flex:1;
     display:none;
     flex-direction:column;
     justify-content:center;
     text-align:center;
-    gap:22px;
+    gap:20px;
   }
   .screen.show{display:flex;}
   .screen h2{
@@ -215,7 +212,7 @@
   .screen p{
     color:var(--ink-soft);
     font-size:15px;
-    line-height:1.8;
+    line-height:1.9;
     margin:0;
   }
   .big-btn{
@@ -241,38 +238,45 @@
     cursor:pointer;
   }
 
+  #result-badge{
+    font-size:54px;
+    line-height:1;
+  }
   #result-score{
     font-family:"Shippori Mincho", serif;
-    font-size:52px;
+    font-size:48px;
     color:var(--vermilion);
     font-weight:700;
     line-height:1;
   }
   #result-score span{
-    font-size:20px;
+    font-size:19px;
     color:var(--ink-soft);
     font-family:"Zen Kaku Gothic New", sans-serif;
   }
 
-  #review-list{
-    text-align:left;
-    max-height:34vh;
-    overflow-y:auto;
-    border-top:1px solid var(--line);
-    padding-top:14px;
-    display:none;
-    flex-direction:column;
-    gap:10px;
+  /* confetti */
+  .confetti-piece{
+    position:fixed;
+    top:-16px;
+    width:9px;
+    height:15px;
+    opacity:.95;
+    pointer-events:none;
+    z-index:50;
+    animation-name:confetti-fall;
+    animation-timing-function:cubic-bezier(.35,0,.65,1);
+    animation-fill-mode:forwards;
   }
-  #review-list.show{display:flex;}
-  .review-item{
-    font-size:13.5px;
-    line-height:1.6;
-    color:var(--ink-soft);
-    border-left:3px solid var(--vermilion);
-    padding:2px 0 2px 10px;
+  @keyframes confetti-fall{
+    to{ transform:translateY(112vh) rotate(600deg); opacity:0; }
   }
-  .review-item b{color:var(--ink); font-family:"Shippori Mincho", serif; font-size:15px;}
+  #result-badge.pop{ animation:pop-in .5s cubic-bezier(.3,1.4,.4,1); }
+  @keyframes pop-in{
+    0%{ transform:scale(.3); opacity:0; }
+    60%{ transform:scale(1.15); opacity:1; }
+    100%{ transform:scale(1); }
+  }
 </style>
 </head>
 <body>
@@ -286,14 +290,12 @@
 
   <main>
 
-    <!-- start screen -->
     <section class="screen show" id="screen-start">
       <h2>意味からことわざを当てよう</h2>
-      <p>ことわざの「意味」が出るので、<br>合うことわざを４つの中から選んでね。<br>全部で100問、小学生レベルのことわざだよ。</p>
+      <p>ことわざの「意味」が出るので、<br>合うことわざを４つの中から選んでね。<br>101このことわざの中から、毎回ランダムで10問出るよ。</p>
       <button class="big-btn" id="start-btn">はじめる</button>
     </section>
 
-    <!-- quiz screen -->
     <section id="screen-quiz">
       <div id="q-card">
         <p id="q-eyebrow">この意味を表することわざは？</p>
@@ -304,132 +306,139 @@
       <button id="next-btn">つぎへ</button>
     </section>
 
-    <!-- result screen -->
     <section class="screen" id="screen-result">
-      <h2>結果発表</h2>
-      <div id="result-score">0<span>/ 100問</span></div>
+      <div id="result-badge"></div>
+      <h2 id="result-title">けっか発表</h2>
+      <div id="result-score" style="display:none;">0<span>/ 10問</span></div>
       <p id="result-comment"></p>
-      <button class="big-btn" id="retry-btn">もう一度挑戦する</button>
-      <button class="ghost-btn" id="review-btn">間違えた問題を見る</button>
-      <div id="review-list"></div>
+      <button class="big-btn" id="result-primary-btn"></button>
+      <button class="ghost-btn" id="result-secondary-btn">さいしょからやり直す</button>
     </section>
 
   </main>
 </div>
 
 <script>
-/* ---------------- 100 elementary-level kotowaza ---------------- */
+/* ---------------- 101 elementary-level kotowaza (with furigana as 漢字(かんじ)) ---------------- */
 const DATA = [
-["猿も木から落ちる","どんなに得意なことでも、失敗することがあるということ。"],
-["石の上にも三年","つらくても我慢して続ければ、いつか成功するということ。"],
-["犬も歩けば棒に当たる","何かをすれば、思いがけない出来事に出会うということ。"],
-["花より団子","見た目の美しさより、実際に役立つものの方がよいということ。"],
-["早起きは三文の徳","朝早く起きると、良いことがあるということ。"],
-["三度目の正直","一度や二度失敗しても、三回目にはうまくいくということ。"],
-["二階から目薬","物事が思うようにいかず、もどかしいことのたとえ。"],
-["蛙の子は蛙","子どもは結局、親に似るものだということ。"],
-["亀の甲より年の功","年上の人の長年の経験や知恵は貴重だということ。"],
-["灯台下暗し","身近なことは、かえって気づきにくいということ。"],
-["火のない所に煙は立たぬ","何の根拠もないのに、うわさは立たないということ。"],
-["七転び八起き","何度失敗しても、あきらめずに立ち直ること。"],
-["塵も積もれば山となる","小さなものでも、たくさん集まれば大きくなるということ。"],
-["転ばぬ先の杖","失敗しないように、前もって準備しておくこと。"],
-["二兎を追う者は一兎をも得ず","欲を出して二つのことを同時にしようとすると、どちらも失敗するということ。"],
-["猫に小判","価値のわからない人に、貴重なものを与えても意味がないこと。"],
-["馬の耳に念仏","いくら意見を言っても、まったく効き目がないこと。"],
-["豚に真珠","値打ちがわからない人に、大切なものを与えても無駄だということ。"],
-["井の中の蛙大海を知らず","せまい世界にいて、広い世界のことを知らないこと。"],
-["百聞は一見に如かず","人から何度も聞くより、一度自分の目で見る方がよくわかるということ。"],
-["継続は力なり","一つのことを続けることが、大きな力になるということ。"],
-["光陰矢の如し","月日が経つのは、矢のようにとても速いということ。"],
-["案ずるより産むが易し","あれこれ心配するより、やってみると意外と簡単だということ。"],
-["急がば回れ","急いでいる時ほど、遠くても安全な道を選んだ方がよいということ。"],
-["果報は寝て待て","あせらずに、良い時期が来るのをのんびり待つのがよいということ。"],
-["棚からぼた餅","思いがけない幸運が舞い込んでくること。"],
-["一石二鳥","一つのことをして、同時に二つの利益を得ること。"],
-["千里の道も一歩から","どんな大きなことも、まずは小さな一歩から始まるということ。"],
-["雨降って地固まる","もめごとの後、かえって物事がうまく収まるということ。"],
-["蒔かぬ種は生えぬ","何もしなければ、良い結果は得られないということ。"],
-["出る杭は打たれる","目立つ人は、他人から非難されたり邪魔されたりしやすいということ。"],
-["知らぬが仏","知らないでいれば、心穏やかでいられるということ。"],
-["覆水盆に返らず","一度してしまったことは、もう取り返しがつかないということ。"],
-["良薬は口に苦し","本当に役立つ忠告ほど、聞くのがつらいということ。"],
-["三人寄れば文殊の知恵","凡人でも三人集まって考えれば、良い知恵が浮かぶということ。"],
-["木を見て森を見ず","小さな部分にとらわれて、全体を見失うこと。"],
-["好きこそ物の上手なれ","好きなことは、熱心に励むので上達するということ。"],
-["立つ鳥跡を濁さず","立ち去る者は、あとが見苦しくないよう始末をしておくべきだということ。"],
-["弘法にも筆の誤り","どんな名人でも、時には失敗することがあるということ。"],
-["河童の川流れ","その道の名人でも、時には失敗することがあるということ。"],
-["明日は明日の風が吹く","先のことを心配しても仕方がない、なんとかなるということ。"],
-["一寸の虫にも五分の魂","どんなに小さく弱い者にも、それなりの意地や考えがあるということ。"],
-["蓼食う虫も好き好き","人の好みはさまざまで、変わったものを好む人もいるということ。"],
-["蛇の道は蛇","同じ仲間のことは、その道の者がよく知っているということ。"],
-["隣の芝生は青い","他人のものは、自分のものより良く見えるということ。"],
-["泣き面に蜂","悪いことの上に、さらに悪いことが重なること。"],
-["弱り目に祟り目","困っている時に、さらに困ったことが重なること。"],
-["二度あることは三度ある","同じようなことは、繰り返し起こりやすいということ。"],
-["習うより慣れろ","人から教わるより、実際にやって慣れる方が身につくということ。"],
-["石橋を叩いて渡る","用心の上にも用心を重ねて、物事を行うこと。"],
-["温故知新","昔のことを学び直して、新しい知識や考えを見つけること。"],
-["一を聞いて十を知る","少し聞いただけで、全体を理解してしまうほど賢いこと。"],
-["過ぎたるは猶及ばざるが如し","やりすぎることは、足りないことと同じくらい良くないということ。"],
-["老いては子に従え","年をとったら、子どもの意見に従うのがよいということ。"],
-["会うは別れの始め","出会った人とは、いつか必ず別れが来るということ。"],
-["青は藍より出でて藍より青し","弟子が師匠より優れた人になることのたとえ。"],
-["朱に交われば赤くなる","つきあう人によって、良くも悪くも影響を受けるということ。"],
-["類は友を呼ぶ","気の合う者や似た者同士は、自然と集まるということ。"],
-["我が身をつねって人の痛さを知れ","自分がつらい思いをして、初めて他人の痛みがわかるということ。"],
-["情けは人のためならず","人に親切にすれば、めぐりめぐって自分に返ってくるということ。"],
-["因果応報","良い行いにも悪い行いにも、それに応じた報いがあるということ。"],
-["善は急げ","良いと思ったことは、迷わずすぐに行動するのがよいということ。"],
-["思い立ったが吉日","何かをしようと思ったら、その日をよい日として、すぐ始めるのがよいということ。"],
-["焼け石に水","わずかな努力や援助では、効果がほとんどないこと。"],
-["骨折り損のくたびれ儲け","苦労しただけで、何の得にもならないこと。"],
-["労多くして功少なし","苦労は多いのに、成果が少ないこと。"],
-["虻蜂取らず","二つのものを同時に得ようとして、両方とも失敗すること。"],
-["大は小を兼ねる","大きいものは、小さいものの代わりとしても使えるということ。"],
-["備えあれば憂いなし","前もって準備をしておけば、いざという時に困らないということ。"],
-["短気は損気","すぐに怒ったり急いだりすると、結局は自分が損をするということ。"],
-["待てば海路の日和あり","焦らずに待っていれば、いつか良い機会がやってくるということ。"],
-["塞翁が馬","人生の幸不幸は、そのときにはわからないものだということ。"],
-["苦あれば楽あり","つらいことの後には、楽しいことがやってくるということ。"],
-["楽あれば苦あり","楽しいことの後には、つらいことがやってくるということ。"],
-["笑う門には福来る","いつも笑って明るく過ごしていれば、自然と幸せがやってくるということ。"],
-["名は体を表す","名前は、その人やものの性質をよく表しているということ。"],
-["百害あって一利なし","悪いことばかりで、良いことが一つもないこと。"],
-["下手の横好き","上手ではないのに、そのことがとても好きで熱心なこと。"],
-["器用貧乏","何でも一通りできる人は、かえって一つのことを極められず大成しにくいこと。"],
-["蛙の面に水","どんな仕打ちを受けても、平気でいることのたとえ。"],
-["猫の手も借りたい","とても忙しくて、誰でもいいから手伝ってほしいこと。"],
-["猫をかぶる","本当の性格を隠して、おとなしそうに見せること。"],
-["馬子にも衣装","どんな人でも、身なりを整えれば立派に見えるということ。"],
-["十人十色","人によって、考え方や好みはそれぞれ違うということ。"],
-["郷に入っては郷に従え","その土地に住んだら、そこの習慣に従うのがよいということ。"],
-["言わぬが花","何でも言葉にしてしまわず、言わない方がよいこともあるということ。"],
-["口は災いの元","不用意な発言が、思わぬ災いを招くもとになるということ。"],
-["三つ子の魂百まで","幼い頃の性格は、年をとっても変わらないということ。"],
-["鳶が鷹を生む","平凡な親から、優れた子どもが生まれること。"],
-["瓜のつるに茄子はならぬ","平凡な親からは、平凡な子どもしか生まれないということ。"],
-["目は口ほどに物を言う","気持ちは、言葉よりも目つきによく表れるということ。"],
-["沈黙は金","余計なことを言わず、黙っている方がよい場合があるということ。"],
-["時は金なり","時間はお金と同じくらい大切なものだということ。"],
-["一期一会","一生に一度だけの出会いだと思って、大切にすること。"],
-["有終の美","物事を最後まで立派にやり遂げること。"],
-["初心忘るべからず","始めた時の新鮮な気持ちや謙虚さを忘れてはいけないということ。"],
-["論より証拠","あれこれ議論するより、証拠を示す方が確かだということ。"],
-["損して得取れ","目先の損を気にせず、あとで大きな得を得るようにすること。"],
-["急いては事を仕損じる","慌てて物事を行うと、失敗しやすいということ。"],
-["腐っても鯛","本当にすぐれたものは、悪くなったり古くなったりしても、それなりの価値を保っているということ。"],
-["医者の不養生","人には立派なことを言うのに、自分では実行できていないことのたとえ。"]
+["猿(さる)も木(き)から落(お)ちる","どんなに得意(とくい)なことでも、失敗(しっぱい)することがあるということ。"],
+["石(いし)の上(うえ)にも三年(さんねん)","つらくても我慢(がまん)して続(つづ)ければ、いつか成功(せいこう)するということ。"],
+["犬(いぬ)も歩(ある)けば棒(ぼう)に当(あ)たる","何(なに)かをすれば、思(おも)いがけない出来事(できごと)に出会(であ)うということ。"],
+["花(はな)より団子(だんご)","見(み)た目(め)の美(うつく)しさより、実際(じっさい)に役立(やくだ)つものの方(ほう)がよいということ。"],
+["早起(はやお)きは三文(さんもん)の徳(とく)","朝早(あさはや)く起(お)きると、良(よ)いことがあるということ。"],
+["三度目(さんどめ)の正直(しょうじき)","一度(いちど)や二度(にど)失敗(しっぱい)しても、三回目(さんかいめ)にはうまくいくということ。"],
+["二階(にかい)から目薬(めぐすり)","物事(ものごと)が思(おも)うようにいかず、もどかしいことのたとえ。"],
+["蛙(かえる)の子(こ)は蛙(かえる)","子(こ)どもは結局(けっきょく)、親(おや)に似(に)るものだということ。"],
+["亀(かめ)の甲(こう)より年(とし)の功(こう)","年上(としうえ)の人(ひと)の長年(ながねん)の経験(けいけん)や知恵(ちえ)は貴重(きちょう)だということ。"],
+["灯台(とうだい)下(もと)暗(くら)し","身近(みぢか)なことは、かえって気(き)づきにくいということ。"],
+["火(ひ)のない所(ところ)に煙(けむり)は立(た)たぬ","何(なん)の根拠(こんきょ)もないのに、うわさは立(た)たないということ。"],
+["七転(ななころ)び八起(やお)き","何度(なんど)失敗(しっぱい)しても、あきらめずに立(た)ち直(なお)ること。"],
+["塵(ちり)も積(つ)もれば山(やま)となる","小(ちい)さなものでも、たくさん集(あつ)まれば大(おお)きくなるということ。"],
+["転(ころ)ばぬ先(さき)の杖(つえ)","失敗(しっぱい)しないように、前(まえ)もって準備(じゅんび)しておくこと。"],
+["二兎(にと)を追(お)う者(もの)は一兎(いっと)をも得(え)ず","欲(よく)を出(だ)して二(ふた)つのことを同時(どうじ)にしようとすると、どちらも失敗(しっぱい)するということ。"],
+["猫(ねこ)に小判(こばん)","価値(かち)のわからない人(ひと)に、貴重(きちょう)なものを与(あた)えても意味(いみ)がないこと。"],
+["馬(うま)の耳(みみ)に念仏(ねんぶつ)","いくら意見(いけん)を言(い)っても、まったく効(き)き目(め)がないこと。"],
+["豚(ぶた)に真珠(しんじゅ)","値打(ねう)ちがわからない人(ひと)に、大切(たいせつ)なものを与(あた)えても無駄(むだ)だということ。"],
+["井(い)の中(なか)の蛙(かわず)大海(たいかい)を知(し)らず","せまい世界(せかい)にいて、広(ひろ)い世界(せかい)のことを知(し)らないこと。"],
+["百聞(ひゃくぶん)は一見(いっけん)に如(し)かず","人(ひと)から何度(なんど)も聞(き)くより、一度(いちど)自分(じぶん)の目(め)で見(み)る方(ほう)がよくわかるということ。"],
+["継続(けいぞく)は力(ちから)なり","一(ひと)つのことを続(つづ)けることが、大(おお)きな力(ちから)になるということ。"],
+["光陰矢(こういんや)の如(ごと)し","月日(つきひ)が経(た)つのは、矢(や)のようにとても速(はや)いということ。"],
+["案(あん)ずるより産(う)むが易(やす)し","あれこれ心配(しんぱい)するより、やってみると意外(いがい)と簡単(かんたん)だということ。"],
+["急(いそ)がば回(まわ)れ","急(いそ)いでいる時(とき)ほど、遠(とお)くても安全(あんぜん)な道(みち)を選(えら)んだ方(ほう)がよいということ。"],
+["果報(かほう)は寝(ね)て待(ま)て","あせらずに、良(よ)い時期(じき)が来(く)るのをのんびり待(ま)つのがよいということ。"],
+["棚(たな)からぼた餅(もち)","思(おも)いがけない幸運(こううん)が舞(ま)い込(こ)んでくること。"],
+["一石二鳥(いっせきにちょう)","一(ひと)つのことをして、同時(どうじ)に二(ふた)つの利益(りえき)を得(え)ること。"],
+["千里(せんり)の道(みち)も一歩(いっぽ)から","どんな大(おお)きなことも、まずは小(ちい)さな一歩(いっぽ)から始(はじ)まるということ。"],
+["雨降(あめふ)って地固(じかた)まる","もめごとの後(あと)、かえって物事(ものごと)がうまく収(おさ)まるということ。"],
+["蒔(ま)かぬ種(たね)は生(は)えぬ","何(なに)もしなければ、良(よ)い結果(けっか)は得(え)られないということ。"],
+["出(で)る杭(くい)は打(う)たれる","目立(めだ)つ人(ひと)は、他人(たにん)から非難(ひなん)されたり邪魔(じゃま)されたりしやすいということ。"],
+["知(し)らぬが仏(ほとけ)","知(し)らないでいれば、心穏(こころおだ)やかでいられるということ。"],
+["覆水盆(ふくすいぼん)に返(かえ)らず","一度(いちど)してしまったことは、もう取(と)り返(かえ)しがつかないということ。"],
+["良薬(りょうやく)は口(くち)に苦(にが)し","本当(ほんとう)に役立(やくだ)つ忠告(ちゅうこく)ほど、聞(き)くのがつらいということ。"],
+["三人寄(さんにんよ)れば文殊(もんじゅ)の知恵(ちえ)","凡人(ぼんじん)でも三人(さんにん)集(あつ)まって考(かんが)えれば、良(よ)い知恵(ちえ)が浮(う)かぶということ。"],
+["木(き)を見(み)て森(もり)を見(み)ず","小(ちい)さな部分(ぶぶん)にとらわれて、全体(ぜんたい)を見失(みうしな)うこと。"],
+["好(す)きこそ物(もの)の上手(じょうず)なれ","好(す)きなことは、熱心(ねっしん)に励(はげ)むので上達(じょうたつ)するということ。"],
+["立(た)つ鳥(とり)跡(あと)を濁(にご)さず","立(た)ち去(さ)る者(もの)は、あとが見苦(みぐる)しくないよう始末(しまつ)をしておくべきだということ。"],
+["弘法(こうぼう)にも筆(ふで)の誤(あやま)り","どんな名人(めいじん)でも、時(とき)には失敗(しっぱい)することがあるということ。"],
+["河童(かっぱ)の川流(かわなが)れ","その道(みち)の名人(めいじん)でも、時(とき)には失敗(しっぱい)することがあるということ。"],
+["明日(あした)は明日(あした)の風(かぜ)が吹(ふ)く","先(さき)のことを心配(しんぱい)しても仕方(しかた)がない、なんとかなるということ。"],
+["一寸(いっすん)の虫(むし)にも五分(ごぶ)の魂(たましい)","どんなに小(ちい)さく弱(よわ)い者(もの)にも、それなりの意地(いじ)や考(かんが)えがあるということ。"],
+["蓼食(たでく)う虫(むし)も好(す)き好(ず)き","人(ひと)の好(この)みはさまざまで、変(か)わったものを好(この)む人(ひと)もいるということ。"],
+["蛇(じゃ)の道(みち)は蛇(へび)","同(おな)じ仲間(なかま)のことは、その道(みち)の者(もの)がよく知(し)っているということ。"],
+["隣(となり)の芝生(しばふ)は青(あお)い","他人(たにん)のものは、自分(じぶん)のものより良(よ)く見(み)えるということ。"],
+["泣(な)き面(つら)に蜂(はち)","悪(わる)いことの上(うえ)に、さらに悪(わる)いことが重(かさ)なること。"],
+["弱(よわ)り目(め)に祟(たた)り目(め)","困(こま)っている時(とき)に、さらに困(こま)ったことが重(かさ)なること。"],
+["二度(にど)あることは三度(さんど)ある","同(おな)じようなことは、繰(く)り返(かえ)し起(お)こりやすいということ。"],
+["習(なら)うより慣(な)れろ","人(ひと)から教(おそ)わるより、実際(じっさい)にやって慣(な)れる方(ほう)が身(み)につくということ。"],
+["石橋(いしばし)を叩(たた)いて渡(わた)る","用心(ようじん)の上(うえ)にも用心(ようじん)を重(かさ)ねて、物事(ものごと)を行(おこな)うこと。"],
+["温故知新(おんこちしん)","昔(むかし)のことを学(まな)び直(なお)して、新(あたら)しい知識(ちしき)や考(かんが)えを見(み)つけること。"],
+["一(いち)を聞(き)いて十(じゅう)を知(し)る","少(すこ)し聞(き)いただけで、全体(ぜんたい)を理解(りかい)してしまうほど賢(かしこ)いこと。"],
+["過(す)ぎたるは猶(なお)及(およ)ばざるが如(ごと)し","やりすぎることは、足(た)りないことと同(おな)じくらい良(よ)くないということ。"],
+["老(お)いては子(こ)に従(したが)え","年(とし)をとったら、子(こ)どもの意見(いけん)に従(したが)うのがよいということ。"],
+["会(あ)うは別(わか)れの始(はじ)め","出会(であ)った人(ひと)とは、いつか必(かなら)ず別(わか)れが来(く)るということ。"],
+["青(あお)は藍(あい)より出(い)でて藍(あい)より青(あお)し","弟子(でし)が師匠(ししょう)より優(すぐ)れた人(ひと)になることのたとえ。"],
+["朱(しゅ)に交(まじ)われば赤(あか)くなる","つきあう人(ひと)によって、良(よ)くも悪(わる)くも影響(えいきょう)を受(う)けるということ。"],
+["類(るい)は友(とも)を呼(よ)ぶ","気(き)の合(あ)う者(もの)や似(に)た者(もの)同士(どうし)は、自然(しぜん)と集(あつ)まるということ。"],
+["我(わ)が身(み)をつねって人(ひと)の痛(いた)さを知(し)れ","自分(じぶん)がつらい思(おも)いをして、初(はじ)めて他人(たにん)の痛(いた)みがわかるということ。"],
+["情(なさ)けは人(ひと)のためならず","人(ひと)に親切(しんせつ)にすれば、めぐりめぐって自分(じぶん)に返(かえ)ってくるということ。"],
+["因果応報(いんがおうほう)","良(よ)い行(おこな)いにも悪(わる)い行(おこな)いにも、それに応(おう)じた報(むく)いがあるということ。"],
+["善(ぜん)は急(いそ)げ","良(よ)いと思(おも)ったことは、迷(まよ)わずすぐに行動(こうどう)するのがよいということ。"],
+["思(おも)い立(た)ったが吉日(きちじつ)","何(なに)かをしようと思(おも)ったら、その日(ひ)をよい日(ひ)として、すぐ始(はじ)めるのがよいということ。"],
+["焼(や)け石(いし)に水(みず)","わずかな努力(どりょく)や援助(えんじょ)では、効果(こうか)がほとんどないこと。"],
+["骨折(ほねお)り損(ぞん)のくたびれ儲(もう)け","苦労(くろう)しただけで、何(なん)の得(とく)にもならないこと。"],
+["労(ろう)多(おお)くして功(こう)少(すく)なし","苦労(くろう)は多(おお)いのに、成果(せいか)が少(すく)ないこと。"],
+["虻蜂取(あぶはちと)らず","二(ふた)つのものを同時(どうじ)に得(え)ようとして、両方(りょうほう)とも失敗(しっぱい)すること。"],
+["大(だい)は小(しょう)を兼(か)ねる","大(おお)きいものは、小(ちい)さいものの代(か)わりとしても使(つか)えるということ。"],
+["備(そな)えあれば憂(うれ)いなし","前(まえ)もって準備(じゅんび)をしておけば、いざという時(とき)に困(こま)らないということ。"],
+["短気(たんき)は損気(そんき)","すぐに怒(おこ)ったり急(いそ)いだりすると、結局(けっきょく)は自分(じぶん)が損(そん)をするということ。"],
+["待(ま)てば海路(かいろ)の日和(ひより)あり","焦(あせ)らずに待(ま)っていれば、いつか良(よ)い機会(きかい)がやってくるということ。"],
+["塞翁(さいおう)が馬(うま)","人生(じんせい)の幸不幸(こうふこう)は、そのときにはわからないものだということ。"],
+["苦(く)あれば楽(らく)あり","つらいことの後(あと)には、楽(たの)しいことがやってくるということ。"],
+["楽(らく)あれば苦(く)あり","楽(たの)しいことの後(あと)には、つらいことがやってくるということ。"],
+["笑(わら)う門(かど)には福(ふく)来(き)る","いつも笑(わら)って明(あか)るく過(す)ごしていれば、自然(しぜん)と幸(しあわ)せがやってくるということ。"],
+["名(な)は体(たい)を表(あらわ)す","名前(なまえ)は、その人(ひと)やものの性質(せいしつ)をよく表(あらわ)しているということ。"],
+["百害(ひゃくがい)あって一利(いちり)なし","悪(わる)いことばかりで、良(よ)いことが一(ひと)つもないこと。"],
+["下手(へた)の横好(よこず)き","上手(じょうず)ではないのに、そのことがとても好(す)きで熱心(ねっしん)なこと。"],
+["器用貧乏(きようびんぼう)","何(なん)でも一通(ひととお)りできる人(ひと)は、かえって一(ひと)つのことを極(きわ)められず大成(たいせい)しにくいこと。"],
+["蛙(かえる)の面(つら)に水(みず)","どんな仕打(しう)ちを受(う)けても、平気(へいき)でいることのたとえ。"],
+["猫(ねこ)の手(て)も借(か)りたい","とても忙(いそが)しくて、誰(だれ)でもいいから手伝(てつだ)ってほしいこと。"],
+["猫(ねこ)をかぶる","本当(ほんとう)の性格(せいかく)を隠(かく)して、おとなしそうに見(み)せること。"],
+["馬子(まご)にも衣装(いしょう)","どんな人(ひと)でも、身(み)なりを整(ととの)えれば立派(りっぱ)に見(み)えるということ。"],
+["十人十色(じゅうにんといろ)","人(ひと)によって、考(かんが)え方(かた)や好(この)みはそれぞれ違(ちが)うということ。"],
+["郷(ごう)に入(い)っては郷(ごう)に従(したが)え","その土地(とち)に住(す)んだら、そこの習慣(しゅうかん)に従(したが)うのがよいということ。"],
+["言(い)わぬが花(はな)","何(なん)でも言葉(ことば)にしてしまわず、言(い)わない方(ほう)がよいこともあるということ。"],
+["口(くち)は災(わざわ)いの元(もと)","不用意(ふようい)な発言(はつげん)が、思(おも)わぬ災(わざわ)いを招(まね)くもとになるということ。"],
+["三(み)つ子(ご)の魂(たましい)百(ひゃく)まで","幼(おさな)い頃(ころ)の性格(せいかく)は、年(とし)をとっても変(か)わらないということ。"],
+["鳶(とんび)が鷹(たか)を生(う)む","平凡(へいぼん)な親(おや)から、優(すぐ)れた子(こ)どもが生(う)まれること。"],
+["瓜(うり)のつるに茄子(なすび)はならぬ","平凡(へいぼん)な親(おや)からは、平凡(へいぼん)な子(こ)どもしか生(う)まれないということ。"],
+["目(め)は口(くち)ほどに物(もの)を言(い)う","気持(きも)ちは、言葉(ことば)よりも目(め)つきによく表(あらわ)れるということ。"],
+["沈黙(ちんもく)は金(きん)","余計(よけい)なことを言(い)わず、黙(だま)っている方(ほう)がよい場合(ばあい)があるということ。"],
+["時(とき)は金(かね)なり","時間(じかん)はお金(かね)と同(おな)じくらい大切(たいせつ)なものだということ。"],
+["一期一会(いちごいちえ)","一生(いっしょう)に一度(いちど)だけの出会(であ)いだと思(おも)って、大切(たいせつ)にすること。"],
+["有終(ゆうしゅう)の美(び)","物事(ものごと)を最後(さいご)まで立派(りっぱ)にやり遂(と)げること。"],
+["初心(しょしん)忘(わす)るべからず","始(はじ)めた時(とき)の新鮮(しんせん)な気持(きも)ちや謙虚(けんきょ)さを忘(わす)れてはいけないということ。"],
+["論(ろん)より証拠(しょうこ)","あれこれ議論(ぎろん)するより、証拠(しょうこ)を示(しめ)す方(ほう)が確(たし)かだということ。"],
+["損(そん)して得(とく)取(と)れ","目先(めさき)の損(そん)を気(き)にせず、あとで大(おお)きな得(とく)を得(え)るようにすること。"],
+["急(せ)いては事(こと)を仕損(しそん)じる","慌(あわ)てて物事(ものごと)を行(おこな)うと、失敗(しっぱい)しやすいということ。"],
+["腐(くさ)っても鯛(たい)","本当(ほんとう)にすぐれたものは、悪(わる)くなったり古(ふる)くなったりしても、それなりの価値(かち)を保(たも)っているということ。"],
+["医者(いしゃ)の不養生(ふようじょう)","人(ひと)には立派(りっぱ)なことを言(い)うのに、自分(じぶん)では実行(じっこう)できていないことのたとえ。"]
 ];
 
 const QUESTIONS = DATA.map(([p,m]) => ({p, m}));
+const ROUND_SIZE = 10;
+
+/* ---------------- furigana renderer: 漢字(かんじ) -> <ruby> ---------------- */
+function rb(text){
+  return text.replace(/([\u4E00-\u9FFF\u3005]+)\(([\u3041-\u3096\u30FC]+)\)/g,
+    '<ruby>$1<rt>$2</rt></ruby>');
+}
 
 /* ---------------- state ---------------- */
-let order = [];
-let idx = 0;
-let score = 0;
-let wrongList = [];
+let sessionQuestions = [];
+let sessionIdx = 0;
+let sessionWrong = [];
+let isReviewMode = false;
+let mainScore = null;
 let answered = false;
 
 /* ---------------- elements ---------------- */
@@ -442,18 +451,16 @@ const qMeaning = document.getElementById('q-meaning');
 const choicesEl = document.getElementById('choices');
 const feedbackEl = document.getElementById('feedback');
 const nextBtn = document.getElementById('next-btn');
+const resultBadge = document.getElementById('result-badge');
+const resultTitle = document.getElementById('result-title');
 const resultScore = document.getElementById('result-score');
 const resultComment = document.getElementById('result-comment');
-const reviewBtn = document.getElementById('review-btn');
-const reviewList = document.getElementById('review-list');
+const primaryBtn = document.getElementById('result-primary-btn');
+const secondaryBtn = document.getElementById('result-secondary-btn');
 
-document.getElementById('start-btn').addEventListener('click', startQuiz);
-document.getElementById('retry-btn').addEventListener('click', startQuiz);
+document.getElementById('start-btn').addEventListener('click', startNewGame);
+secondaryBtn.addEventListener('click', startNewGame);
 nextBtn.addEventListener('click', nextQuestion);
-reviewBtn.addEventListener('click', () => {
-  reviewList.classList.toggle('show');
-  reviewBtn.textContent = reviewList.classList.contains('show') ? '間違えた問題を閉じる' : '間違えた問題を見る';
-});
 
 function shuffle(arr){
   const a = arr.slice();
@@ -464,21 +471,28 @@ function shuffle(arr){
   return a;
 }
 
-function startQuiz(){
-  order = shuffle(QUESTIONS.map((_,i)=>i));
-  idx = 0;
-  score = 0;
-  wrongList = [];
-  reviewList.classList.remove('show');
-  reviewList.innerHTML = '';
-  reviewBtn.textContent = '間違えた問題を見る';
+function show(screen){
+  [screenStart, screenQuiz, screenResult].forEach(s => s.classList.remove('show'));
+  screen.classList.add('show');
+}
+
+function startNewGame(){
+  sessionQuestions = shuffle(QUESTIONS).slice(0, ROUND_SIZE);
+  sessionIdx = 0;
+  sessionWrong = [];
+  isReviewMode = false;
+  mainScore = null;
   show(screenQuiz);
   renderQuestion();
 }
 
-function show(screen){
-  [screenStart, screenQuiz, screenResult].forEach(s => s.classList.remove('show'));
-  screen.classList.add('show');
+function startReview(qs){
+  sessionQuestions = shuffle(qs);
+  sessionIdx = 0;
+  sessionWrong = [];
+  isReviewMode = true;
+  show(screenQuiz);
+  renderQuestion();
 }
 
 function renderQuestion(){
@@ -486,12 +500,13 @@ function renderQuestion(){
   feedbackEl.classList.remove('show');
   nextBtn.classList.remove('show');
 
-  const q = QUESTIONS[order[idx]];
-  progressLabel.textContent = (idx+1) + ' / ' + QUESTIONS.length;
-  progressFill.style.width = ((idx)/QUESTIONS.length*100) + '%';
-  qMeaning.textContent = q.m;
+  const q = sessionQuestions[sessionIdx];
+  const prefix = isReviewMode ? '復習 ' : '';
+  progressLabel.textContent = prefix + (sessionIdx+1) + ' / ' + sessionQuestions.length;
+  progressFill.style.width = ((sessionIdx)/sessionQuestions.length*100) + '%';
+  qMeaning.innerHTML = rb(q.m);
 
-  const distractorPool = QUESTIONS.filter((_,i) => i !== order[idx]).map(x => x.p);
+  const distractorPool = QUESTIONS.filter(x => x.p !== q.p).map(x => x.p);
   const distractors = shuffle(distractorPool).slice(0,3);
   const options = shuffle([q.p, ...distractors]);
   const labels = ['ア','イ','ウ','エ'];
@@ -500,69 +515,141 @@ function renderQuestion(){
   options.forEach((opt, i) => {
     const btn = document.createElement('button');
     btn.className = 'choice';
-    btn.innerHTML = '<span class="mark">' + labels[i] + '</span><span>' + opt + '</span>';
-    btn.addEventListener('click', () => selectAnswer(btn, opt, q.p, q.m));
+    btn.dataset.proverb = opt;
+    btn.innerHTML = '<span class="mark">' + labels[i] + '</span><span>' + rb(opt) + '</span>';
+    btn.addEventListener('click', () => selectAnswer(btn, opt, q));
     choicesEl.appendChild(btn);
   });
 }
 
-function selectAnswer(btn, chosen, correct, meaning){
+function selectAnswer(btn, chosen, q){
   if(answered) return;
   answered = true;
 
-  const isCorrect = chosen === correct;
-  if(isCorrect){
-    score++;
-    btn.classList.add('correct');
-  } else {
-    btn.classList.add('wrong');
-    wrongList.push({p: correct, m: meaning, chosen});
+  const isCorrect = chosen === q.p;
+  if(!isCorrect){
+    sessionWrong.push(q);
   }
 
   [...choicesEl.children].forEach(c => {
     c.classList.add('locked');
-    const text = c.querySelector('span:last-child').textContent;
-    if(text === correct) c.classList.add('correct');
+    if(c.dataset.proverb === q.p) c.classList.add('correct');
     else if(c !== btn) c.classList.add('dim');
   });
+  if(!isCorrect) btn.classList.add('wrong');
 
-  feedbackEl.textContent = isCorrect ? '正解！「' + correct + '」' : '残念、正しくは「' + correct + '」';
+  feedbackEl.innerHTML = isCorrect
+    ? '正解！「' + rb(q.p) + '」'
+    : '残念、正しくは「' + rb(q.p) + '」';
   feedbackEl.classList.add('show');
   nextBtn.classList.add('show');
-  nextBtn.textContent = (idx === QUESTIONS.length-1) ? '結果を見る' : 'つぎへ';
+  nextBtn.textContent = (sessionIdx === sessionQuestions.length-1) ? '結果を見る' : 'つぎへ';
 }
 
 function nextQuestion(){
-  idx++;
-  if(idx >= QUESTIONS.length){
-    finishQuiz();
+  sessionIdx++;
+  if(sessionIdx >= sessionQuestions.length){
+    finishRound();
   } else {
     renderQuestion();
   }
 }
 
-function finishQuiz(){
+function finishRound(){
   progressFill.style.width = '100%';
-  resultScore.innerHTML = score + '<span>/ ' + QUESTIONS.length + '問</span>';
 
-  let comment;
-  const rate = score / QUESTIONS.length;
-  if(rate === 1) comment = 'パーフェクト！ことわざ博士だね。';
-  else if(rate >= 0.8) comment = 'すごい！ほとんど覚えているね。';
-  else if(rate >= 0.5) comment = 'いい調子！もう少しで半分以上マスターだよ。';
-  else comment = 'これから伸びしろたっぷり！もう一度挑戦してみよう。';
-  resultComment.textContent = comment;
-
-  if(wrongList.length === 0){
-    reviewBtn.style.display = 'none';
+  if(!isReviewMode){
+    mainScore = sessionQuestions.length - sessionWrong.length;
+    showMainResult(mainScore, sessionQuestions.length);
+  } else if(sessionWrong.length === 0){
+    showClearedResult();
   } else {
-    reviewBtn.style.display = 'inline-block';
-    reviewList.innerHTML = wrongList.map(w =>
-      '<div class="review-item"><b>' + w.p + '</b><br>' + w.m + '</div>'
-    ).join('');
+    showContinueReview();
   }
+}
 
+function showMainResult(score, total){
+  resultTitle.textContent = 'けっか発表';
+  resultScore.style.display = 'block';
+  resultScore.innerHTML = score + '<span>/ ' + total + '問</span>';
+
+  let comment, badge, confettiCount;
+  if(score === total){
+    badge = '🏆'; comment = 'パーフェクト！ことわざ博士だね！';
+    confettiCount = 70;
+  } else if(score >= 7){
+    badge = '🎉'; comment = 'すごい！よくがんばりました！';
+    confettiCount = 40;
+  } else if(score >= 4){
+    badge = '😊'; comment = 'いいちょうし！つぎもがんばろう！';
+    confettiCount = 20;
+  } else {
+    badge = '🌱'; comment = 'ここからぐんぐん伸びるよ！応援してるよ！';
+    confettiCount = 10;
+  }
+  resultBadge.textContent = badge;
+  resultComment.textContent = comment;
+  launchConfetti(confettiCount);
+  bounceBadge();
+
+  if(sessionWrong.length > 0){
+    const wrongSet = sessionWrong.slice();
+    primaryBtn.textContent = 'まちがえた問題(' + wrongSet.length + '問)に挑戦';
+    primaryBtn.onclick = () => startReview(wrongSet);
+  } else {
+    primaryBtn.textContent = 'もう一度10問に挑戦';
+    primaryBtn.onclick = startNewGame;
+  }
   show(screenResult);
+}
+
+function showContinueReview(){
+  resultTitle.textContent = 'もう少し！';
+  resultScore.style.display = 'none';
+  resultBadge.textContent = '💪';
+  resultComment.textContent = 'まだ ' + sessionWrong.length + '問 のこっているよ。もう一度挑戦しよう！';
+  bounceBadge();
+
+  const wrongSet = sessionWrong.slice();
+  primaryBtn.textContent = 'のこり' + wrongSet.length + '問に挑戦';
+  primaryBtn.onclick = () => startReview(wrongSet);
+  show(screenResult);
+}
+
+function showClearedResult(){
+  resultTitle.textContent = '全問クリア！';
+  resultScore.style.display = 'none';
+  resultBadge.textContent = '🎊';
+  resultComment.textContent = '最初は10問中 ' + mainScore + '問正解だったけど、復習して全部おぼえられたね！';
+  launchConfetti(55);
+  bounceBadge();
+
+  primaryBtn.textContent = 'もう一度10問に挑戦';
+  primaryBtn.onclick = startNewGame;
+  show(screenResult);
+}
+
+function bounceBadge(){
+  resultBadge.classList.remove('pop');
+  void resultBadge.offsetWidth;
+  resultBadge.classList.add('pop');
+}
+
+function launchConfetti(count){
+  const colors = ['#233A5E','#B33B2B','#C79A3A','#5b544c'];
+  for(let i=0;i<count;i++){
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const duration = 2.4 + Math.random()*1.6;
+    const delay = Math.random()*0.4;
+    piece.style.left = Math.random()*100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    piece.style.animationDuration = duration + 's';
+    piece.style.animationDelay = delay + 's';
+    piece.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), (duration+delay)*1000 + 100);
+  }
 }
 </script>
 </body>
